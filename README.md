@@ -1,0 +1,1 @@
+[![example workflow](https://github.com/Regelink/AndroidCICD/actions/workflows/android.yml/badge.svg "Click to view Actions and the built APK!")](https://github.com/Regelink/AndroidCICD/actions/workflows/android.yml)
