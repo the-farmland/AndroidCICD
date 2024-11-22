@@ -1,26 +1,23 @@
 package com.example.myfirstapp
 
-import androidx.appcompat.app.AppCompatActivity
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.EditText
-
-const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
-	}
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-	/** Called when the user taps the Send button */
-	fun sendMessage(@Suppress("UNUSED_PARAMETER") view: View) {
-		val editText = findViewById<EditText>(R.id.editText)
-		val message = editText.text.toString()
-		val intent = Intent(this, DisplayMessageActivity::class.java).apply {
-			putExtra(EXTRA_MESSAGE, message)
-		}
-		startActivity(intent)
-	}
+        // Create a WebView instance
+        val webView = WebView(this)
+        setContentView(webView)
+
+        // Configure the WebView
+        webView.webViewClient = WebViewClient() // Ensures links open within the app
+        webView.settings.javaScriptEnabled = true // Enable JavaScript if needed
+
+        // Load a URL
+        webView.loadUrl("https://www.example.com") // Replace with your desired URL
+    }
 }
