@@ -7,16 +7,40 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-
-const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.TextView
+import android.view.Gravity
+import android.view.View
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create and set up the WebView
+        // Create the WebView
         val webView = WebView(this)
-        setContentView(webView)
+
+        // Create a FrameLayout to hold both WebView and the "Try Again" message
+        val layout = FrameLayout(this)
+        setContentView(layout)
+
+        // Create a "Try Again" button and set its visibility to GONE initially
+        val tryAgainButton = Button(this)
+        tryAgainButton.text = "Try Again"
+        tryAgainButton.gravity = Gravity.CENTER
+        tryAgainButton.visibility = View.GONE
+
+        // Create a TextView for the error message
+        val errorMessage = TextView(this)
+        errorMessage.text = "No internet connection. Please try again."
+        errorMessage.gravity = Gravity.CENTER
+        errorMessage.visibility = View.GONE
+
+        // Add WebView, error message, and "Try Again" button to the layout
+        layout.addView(webView)
+        layout.addView(errorMessage)
+        layout.addView(tryAgainButton)
 
         // Enable WebView debugging only for devices with API level 19 or higher
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -40,6 +64,9 @@ class MainActivity : AppCompatActivity() {
             ) {
                 super.onReceivedError(view, errorCode, description, failingUrl)
                 Log.e("WebViewError", "Error loading URL: $failingUrl, Description: $description")
+                // Show error message and retry button if page fails to load
+                val noConnection = NoConnection(this@MainActivity)
+                noConnection.handleNoConnection(webView, tryAgainButton, errorMessage, "https://www.plus-us.com")
             }
 
             override fun onReceivedHttpError(
@@ -57,6 +84,7 @@ class MainActivity : AppCompatActivity() {
         webView.settings.setAppCacheEnabled(true)
 
         // Load the desired webpage
-        webView.loadUrl("https://www.plus-us.com")
+        val noConnection = NoConnection(this)
+        noConnection.handleNoConnection(webView, tryAgainButton, errorMessage, "https://www.plus-us.com")
     }
 }
