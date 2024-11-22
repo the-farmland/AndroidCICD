@@ -14,7 +14,7 @@
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/edit_message"
-        android:inputType="url"
+        android:inputType="textUri"
         app:layout_constraintEnd_toStartOf="@+id/button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
