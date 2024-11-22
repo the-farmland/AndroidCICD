@@ -9,12 +9,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create a WebView instance
+        // Create a WebView instance programmatically
         val webView = WebView(this)
         setContentView(webView)
 
         // Configure the WebView
-        webView.webViewClient = WebViewClient() // Ensures links open within the app
+        webView.webViewClient = WebViewClient() // Ensures links open in the app
         webView.settings.javaScriptEnabled = true // Enable JavaScript if needed
 
         // Load a URL
