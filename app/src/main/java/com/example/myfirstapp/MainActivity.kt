@@ -1,11 +1,11 @@
 package com.example.myfirstapp
 
-const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
-
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+
+const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE" // This must be at the top, before any class or function definitions
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
