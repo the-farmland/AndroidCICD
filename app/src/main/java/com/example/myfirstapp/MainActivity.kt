@@ -18,9 +18,6 @@ class MainActivity : AppCompatActivity() {
         // Configure WebView settings
         webView.webViewClient = WebViewClient() // Ensures links open in the WebView
         webView.settings.javaScriptEnabled = true // Enable JavaScript if required
-        
-        webView.clearCache(true)
-        webView.clearHistory()
 
         // Load the desired webpage
         webView.loadUrl("https://www.plus-us.com") // Replace with your desired URL
