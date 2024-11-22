@@ -1,5 +1,7 @@
 package com.example.myfirstapp
 
+const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
+
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
