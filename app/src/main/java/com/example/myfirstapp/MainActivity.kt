@@ -20,6 +20,6 @@ class MainActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true // Enable JavaScript if required
 
         // Load the desired webpage
-        webView.loadUrl("https://www.example.com") // Replace with your desired URL
+        webView.loadUrl("https://www.plus-us.com") // Replace with your desired URL
     }
 }
