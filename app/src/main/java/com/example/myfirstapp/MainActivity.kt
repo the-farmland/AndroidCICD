@@ -14,6 +14,8 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
@@ -24,11 +26,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Set the content below the status bar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
+
         // Create the WebView
         webView = WebView(this)
 
         // Create a FrameLayout to hold both WebView and the "Try Again" message
-        val layout = FrameLayout(this)
+        val layout = FrameLayout(this).apply {
+            // Ensure the layout respects system windows (status bar and navigation bar)
+            fitsSystemWindows = true
+        }
         setContentView(layout)
 
         // Create a "Try Again" button and set its visibility to GONE initially
@@ -46,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Add WebView, error message, and "Try Again" button to the layout
-        layout.addView(webView)
+        layout.addView(webView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         layout.addView(errorMessage)
         layout.addView(tryAgainButton)
 
