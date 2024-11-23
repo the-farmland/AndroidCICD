@@ -6,13 +6,15 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">@color/black</item> <!-- Ensures black background -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item> <!-- White icons on the status bar -->
+        <!-- Only include windowLightStatusBar for API 23+ -->
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
 
     <!-- Splash screen theme -->
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_background</item> <!-- Custom drawable -->
-        <item name="android:statusBarColor">@android:color/transparent</item> <!-- Transparent status bar -->
-        <item name="android:windowLightStatusBar">false</item> <!-- White icons on the status bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Only include windowLightStatusBar for API 23+ -->
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
 </resources>
