@@ -20,6 +20,7 @@ import android.net.Uri
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
+import com.example.myfirstapp.MediaPipeline
 
 class MainActivity : AppCompatActivity() {
 
@@ -159,6 +160,8 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
+                // Use MediaPipeline to upload the file
+                MediaPipeline.uploadMedia(uri, this)
                 uploadMessage?.onReceiveValue(arrayOf(uri))
             }
         } else {
