@@ -1,4 +1,4 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.components.network
 
 import android.app.Notification
 import android.app.NotificationManager
