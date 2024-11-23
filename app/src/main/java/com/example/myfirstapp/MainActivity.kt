@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private var doubleBackToExitPressedOnce = false
-    private var uploadMessage: ValueCallback<Uri>? = null
+    private var uploadMessage: ValueCallback<Array<Uri>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,18 +63,20 @@ class MainActivity : AppCompatActivity() {
             settings.allowFileAccess = true
             settings.cacheMode = WebSettings.LOAD_DEFAULT
 
-            // Handle file uploads
-            webChromeClient = object : WebChromeClient() {
-                override fun onShowFileChooser(
-                    view: WebView?, filePathCallback: ValueCallback<Uri>?, fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    uploadMessage = filePathCallback
-                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                        type = "image/*"
-                        addCategory(Intent.CATEGORY_OPENABLE)
+            // Handle file uploads for versions above API 21 (Lollipop)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                webChromeClient = object : WebChromeClient() {
+                    override fun onShowFileChooser(
+                        view: WebView?, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: WebChromeClient.FileChooserParams?
+                    ): Boolean {
+                        uploadMessage = filePathCallback
+                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                            type = "image/*"
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                        }
+                        startActivityForResult(intent, 1)
+                        return true
                     }
-                    startActivityForResult(intent, 1)
-                    return true
                 }
             }
 
@@ -157,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                uploadMessage?.onReceiveValue(uri)
+                uploadMessage?.onReceiveValue(arrayOf(uri))
             }
         } else {
             uploadMessage?.onReceiveValue(null)
