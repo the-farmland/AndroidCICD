@@ -1,5 +1,6 @@
 package com.example.myfirstapp
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,7 +8,6 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.SystemClock
-import android.support.v4.app.NotificationCompat
 
 class NetworkChangeReceiver : BroadcastReceiver() {
 
@@ -38,11 +38,12 @@ class NetworkChangeReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notification = NotificationCompat.Builder(context)
-            .setSmallIcon(R.mipmap.ic_launcher)
+        // Create a simple notification
+        val notification = Notification.Builder(context)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Default Android icon
             .setContentTitle("Internet Restored!")
             .setContentText("Catch up on what's happening now!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
             .build()
 
         notificationManager.notify(1, notification)
