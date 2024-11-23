@@ -1,13 +1,18 @@
 <resources>
     <!-- Base application theme -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/black</item> <!-- Ensures black background -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item> <!-- White icons on the status bar -->
     </style>
 
-    <!-- Splash screen theme (for older versions) -->
+    <!-- Splash screen theme -->
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@color/colorPrimary</item> <!-- Background color -->
+        <item name="android:windowBackground">@drawable/splash_background</item> <!-- Custom drawable -->
+        <item name="android:statusBarColor">@android:color/transparent</item> <!-- Transparent status bar -->
+        <item name="android:windowLightStatusBar">false</item> <!-- White icons on the status bar -->
     </style>
 </resources>
