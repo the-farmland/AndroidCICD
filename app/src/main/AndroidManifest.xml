@@ -2,34 +2,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.example.myfirstapp">
 
-    <!-- Add internet permission here -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-          
 
-<application
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-    android:label="@string/app_name"
-    android:icon="@mipmap/ic_launcher">
+    <application
+        android:theme="@style/AppTheme" <!-- Use the updated AppTheme -->
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher">
 
-    <!-- SplashScreen as the launcher activity -->
-    <activity
-        android:name=".SplashScreen"
-        android:exported="true"
-        android:theme="@style/SplashTheme"
-        android:launchMode="singleTask">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+        <!-- SplashScreen as the launcher activity -->
+        <activity
+            android:name=".SplashScreen"
+            android:exported="true"
+            android:theme="@style/SplashTheme" <!-- Use the updated SplashTheme -->
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-    <!-- MainActivity -->
-    <activity
-        android:name=".MainActivity"
-        android:exported="true">
-    </activity>
-</application>
+        <!-- MainActivity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+        </activity>
 
-
+    </application>
 </manifest>
