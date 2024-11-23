@@ -77,11 +77,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Enable JavaScript and other settings required for modern web applications
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.settings.allowFileAccess = true
-        webView.settings.setAppCacheEnabled(true)
+// Enable JavaScript and other settings required for modern web applications
+         webView.settings.javaScriptEnabled = true  
+         webView.settings.domStorageEnabled = true 
+         webView.settings.allowFileAccess = true
+         webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+
 
         // Load the desired webpage
         val noConnection = NoConnection(this)
