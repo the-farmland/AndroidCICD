@@ -1,36 +1,43 @@
 package com.example.myfirstapp
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
+import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
-import android.view.Gravity
-import android.view.View
 import android.widget.Toast
-import android.content.Intent
-import android.net.Uri
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.myfirstapp.MediaPipeline
-import com.example.myfirstapp.components.behaviors.KeyboardBehavior // Importing KeyboardBehavior
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private var doubleBackToExitPressedOnce = false
     private var uploadMessage: ValueCallback<Array<Uri>>? = null
+    private val FILE_PICKER_REQUEST_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Set layout for the splash screen
+        setContentView(R.layout.activity_main)
 
         // Create the WebView
         webView = WebView(this)
@@ -66,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_DEFAULT
 
             // Handle file uploads for versions above API 21 (Lollipop)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 webChromeClient = object : WebChromeClient() {
                     override fun onShowFileChooser(
                         view: WebView?, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: WebChromeClient.FileChooserParams?
@@ -76,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                             type = "image/*"
                             addCategory(Intent.CATEGORY_OPENABLE)
                         }
-                        startActivityForResult(intent, 1)
+                        startActivityForResult(intent, FILE_PICKER_REQUEST_CODE)
                         return true
                     }
                 }
@@ -119,9 +126,9 @@ class MainActivity : AppCompatActivity() {
         // Load the initial URL
         loadWebPage("https://www.plus-us.com")
 
-        // Set up KeyboardBehavior for resizing WebView
-        val keyboardBehavior = KeyboardBehavior(layout, webView)
-        keyboardBehavior.setupKeyboardListener()
+        // Request permissions for accessing external storage
+        requestPermissions()
+
     }
 
     private fun loadWebPage(url: String) {
@@ -163,14 +170,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                // File selected successfully; invoke callback
+                // Call the MediaPipeline to upload the selected media
+                MediaPipeline.uploadMedia(uri, this)
                 uploadMessage?.onReceiveValue(arrayOf(uri))
             }
         } else {
             uploadMessage?.onReceiveValue(null)
         }
-        uploadMessage = null
+    }
+
+    // Request necessary permissions for storage access
+    private fun requestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+        }
     }
 }
