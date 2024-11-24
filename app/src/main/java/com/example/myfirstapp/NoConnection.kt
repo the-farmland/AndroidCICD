@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -11,7 +12,7 @@ import android.webkit.WebView
 
 class NoConnection(private val context: Context) {
     private var dinosaurGame: DinosaurGame? = null
-    
+
     fun handleNoConnection(
         webView: WebView,
         container: FrameLayout,
@@ -20,11 +21,12 @@ class NoConnection(private val context: Context) {
         url: String
     ) {
         if (isNetworkAvailable()) {
+            // Internet is available
             webView.loadUrl(url)
             webView.visibility = View.VISIBLE
             errorMessage.visibility = View.GONE
             tryAgainButton.visibility = View.GONE
-            
+
             // Remove dinosaur game if it exists
             dinosaurGame?.let {
                 it.stopGame()
@@ -32,15 +34,23 @@ class NoConnection(private val context: Context) {
                 dinosaurGame = null
             }
         } else {
+            // No internet connection
             webView.visibility = View.GONE
-            errorMessage.visibility = View.VISIBLE
-            tryAgainButton.visibility = View.VISIBLE
-            
+            errorMessage.visibility = View.GONE  // Hide error message when showing game
+            tryAgainButton.visibility = View.GONE  // Hide try again button when showing game
+
             // Show dinosaur game
             if (dinosaurGame == null) {
                 dinosaurGame = DinosaurGame(context)
-                container.addView(dinosaurGame)
+                // Set layout parameters for the game to fill the container
+                val layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                dinosaurGame?.layoutParams = layoutParams
+                container.addView(dinosaurGame, 0)  // Add at index 0 to be behind other views
             }
+            dinosaurGame?.visibility = View.VISIBLE
         }
 
         tryAgainButton.setOnClickListener {

@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private var uploadMessage: ValueCallback<Array<Uri>>? = null
     private val FILE_PICKER_REQUEST_CODE = 1001
     private lateinit var noConnection: NoConnection
-    private lateinit var layout: FrameLayout  // Added layout as class property
+    private lateinit var layout: FrameLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,20 +45,38 @@ class MainActivity : AppCompatActivity() {
         webView = WebView(this)
 
         // Create a FrameLayout to hold both WebView and the "Try Again" message
-        layout = FrameLayout(this)  // Initialize layout property
+        layout = FrameLayout(this)
+        
+        // Set layout parameters for the container
+        layout.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        
         setContentView(layout)
 
         // Create a "Try Again" button and set its visibility to GONE initially
         val tryAgainButton = Button(this).apply {
             text = "Try Again"
-            gravity = Gravity.CENTER
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
             visibility = View.GONE
         }
 
         // Create a TextView for the error message
         val errorMessage = TextView(this).apply {
             text = "No internet connection. Please try again."
-            gravity = Gravity.CENTER
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+                setMargins(0, 0, 0, 200)
+            }
             visibility = View.GONE
         }
 
@@ -133,7 +151,6 @@ class MainActivity : AppCompatActivity() {
 
         // Request permissions for accessing external storage
         requestPermissions()
-
     }
 
     private fun loadWebPage(url: String) {
