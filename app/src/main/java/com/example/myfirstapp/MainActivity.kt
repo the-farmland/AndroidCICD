@@ -3,6 +3,7 @@ package com.example.myfirstapp
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -37,6 +38,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Make the status bar transparent
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        window.statusBarColor = Color.TRANSPARENT
 
         setContentView(R.layout.activity_main)
 
@@ -178,19 +184,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    super.onActivityResult(requestCode, resultCode, data)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-    if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-        data?.data?.let { uri ->
-            MediaPipeline.uploadMedia(uri, this)
-            uploadMessage?.onReceiveValue(arrayOf(uri))
+        if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                MediaPipeline.uploadMedia(uri, this)
+                uploadMessage?.onReceiveValue(arrayOf(uri))
+            }
+        } else {
+            uploadMessage?.onReceiveValue(null)
         }
-    } else {
-        uploadMessage?.onReceiveValue(null)
     }
-}
-
 
     private fun requestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
