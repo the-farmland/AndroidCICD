@@ -53,6 +53,9 @@ class MainActivity : AppCompatActivity() {
             FrameLayout.LayoutParams.MATCH_PARENT
         )
         
+        // Configure window to adjust resize when keyboard appears
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        
         setContentView(layout)
 
         // Create a "Try Again" button and set its visibility to GONE initially

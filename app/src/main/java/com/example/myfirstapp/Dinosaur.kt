@@ -3,6 +3,7 @@ package com.example.myfirstapp
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Color
 import android.view.MotionEvent
 import android.view.View
 import android.os.Handler
@@ -32,12 +33,14 @@ class DinosaurGame(context: Context) : View(context) {
             }
         }
     }
-
+    
     init {
+        // Set default paint properties
         paint.textSize = 40f
+        paint.color = Color.WHITE  // Set default text color to white
         startGame()
     }
-
+    
     private fun startGame() {
         score = 0
         isGameOver = false
@@ -45,7 +48,7 @@ class DinosaurGame(context: Context) : View(context) {
         dinosaurY = 300f
         updateHandler.post(updateRunnable)
     }
-
+    
     private fun updateGame() {
         // Update dinosaur position
         if (isJumping) {
@@ -57,54 +60,58 @@ class DinosaurGame(context: Context) : View(context) {
                 jumpVelocity = 0f
             }
         }
-
+        
         // Update obstacles
         if (Random.nextFloat() < 0.02) {
             obstacles.add(Pair(width.toFloat(), 300f))
         }
-
+        
         obstacles = obstacles.mapNotNull { (x, y) ->
             val newX = x - gameSpeed
             if (newX < -20) null else Pair(newX, y)
         }.toMutableList()
-
+        
         // Check collisions
         obstacles.forEach { (x, y) ->
             if (Math.abs(x - dinosaurX) < 30 && Math.abs(y - dinosaurY) < 30) {
                 isGameOver = true
             }
         }
-
+        
         // Update score
         if (!isGameOver) {
             score++
         }
     }
-
+    
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         
         // Draw dinosaur (X)
+        paint.color = Color.GREEN  // Make dinosaur green
         paint.textSize = 40f
         canvas.drawText("X", dinosaurX, dinosaurY, paint)
-
+        
         // Draw obstacles (O)
+        paint.color = Color.RED  // Make obstacles red
         obstacles.forEach { (x, y) ->
             canvas.drawText("O", x, y, paint)
         }
-
+        
         // Draw score
+        paint.color = Color.WHITE  // Make score white
         paint.textSize = 30f
         canvas.drawText("Score: $score", 50f, 50f, paint)
-
+        
         if (isGameOver) {
+            paint.color = Color.YELLOW  // Make game over text yellow
             paint.textSize = 60f
             canvas.drawText("Game Over!", width/2f - 120f, height/2f, paint)
             paint.textSize = 30f
             canvas.drawText("Tap to restart", width/2f - 80f, height/2f + 50f, paint)
         }
     }
-
+    
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -118,7 +125,7 @@ class DinosaurGame(context: Context) : View(context) {
         }
         return true
     }
-
+    
     fun stopGame() {
         updateHandler.removeCallbacks(updateRunnable)
     }
