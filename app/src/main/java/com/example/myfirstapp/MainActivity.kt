@@ -178,24 +178,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-            data?.data?.let { uri ->
-                val file = MediaPipeline.getFileFromUri(uri, this)
-                if (file != null) {
-                    Log.d("File Upload", "File ready to upload: ${file.absolutePath}")
-                    uploadMessage?.onReceiveValue(arrayOf(uri))
-                } else {
-                    Log.e("File Upload", "Failed to prepare the file.")
-                    uploadMessage?.onReceiveValue(null)
-                }
-            } ?: uploadMessage?.onReceiveValue(null)
-        } else {
-            uploadMessage?.onReceiveValue(null)
+    if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+        data?.data?.let { uri ->
+            MediaPipeline.uploadMedia(uri, this)
+            uploadMessage?.onReceiveValue(arrayOf(uri))
         }
+    } else {
+        uploadMessage?.onReceiveValue(null)
     }
+}
+
 
     private fun requestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {

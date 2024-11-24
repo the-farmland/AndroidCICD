@@ -3,7 +3,6 @@ package com.example.myfirstapp
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import java.io.File
@@ -13,16 +12,9 @@ object MediaPipeline {
     /**
      * Launches the Media Picker to allow users to select media files.
      */
-    fun launchMediaPicker(context: Context): Intent {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // Use the modern media picker
-            Intent(MediaStore.ACTION_PICK_IMAGES).apply {
-                type = "image/*"
-                putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, 1) // Limit selection to one image
-            }
-        } else {
-            // Fallback for older devices using the gallery picker
-            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    fun launchMediaPicker(): Intent {
+        return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+            type = "image/*"
         }
     }
 
@@ -37,7 +29,7 @@ object MediaPipeline {
             val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
             context.contentResolver.query(uri, filePathColumn, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
-                    val columnIndex = cursor.getColumnIndex(filePathColumn[0])
+                    val columnIndex = cursor.getColumnIndexOrThrow(filePathColumn[0])
                     val filePath = cursor.getString(columnIndex)
                     return File(filePath)
                 }
