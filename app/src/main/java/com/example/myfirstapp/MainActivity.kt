@@ -38,27 +38,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Set layout for the splash screen
         setContentView(R.layout.activity_main)
 
         // Create the WebView
         webView = WebView(this)
 
         // Create a FrameLayout to hold both WebView and the "Try Again" message
-        layout = FrameLayout(this)
-        
-        // Set layout parameters for the container
-        layout.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
-        
+        layout = FrameLayout(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+
         // Configure window to adjust resize when keyboard appears
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        
+
         setContentView(layout)
 
-        // Create a "Try Again" button and set its visibility to GONE initially
+        // Create a "Try Again" button
         val tryAgainButton = Button(this).apply {
             text = "Try Again"
             layoutParams = FrameLayout.LayoutParams(
@@ -88,30 +86,27 @@ class MainActivity : AppCompatActivity() {
         layout.addView(errorMessage)
         layout.addView(tryAgainButton)
 
-        // Initialize NoConnection handler
         noConnection = NoConnection(this)
 
-        // Configure WebView settings
         webView.apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.allowFileAccess = true
-            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                allowFileAccess = true
+                cacheMode = WebSettings.LOAD_DEFAULT
+            }
 
-            // Handle file uploads for versions above API 21 (Lollipop)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                webChromeClient = object : WebChromeClient() {
-                    override fun onShowFileChooser(
-                        view: WebView?, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: WebChromeClient.FileChooserParams?
-                    ): Boolean {
-                        uploadMessage = filePathCallback
-                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                            type = "image/*"
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                        }
-                        startActivityForResult(intent, FILE_PICKER_REQUEST_CODE)
-                        return true
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    view: WebView?, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    uploadMessage = filePathCallback
+                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                        type = "*/*"
+                        addCategory(Intent.CATEGORY_OPENABLE)
                     }
+                    startActivityForResult(intent, FILE_PICKER_REQUEST_CODE)
+                    return true
                 }
             }
 
@@ -143,16 +138,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Set the Try Again button action
         tryAgainButton.setOnClickListener {
             webView.reload()
             hideError(tryAgainButton, errorMessage)
         }
 
-        // Load the initial URL
         loadWebPage("https://www.plus-us.com")
-
-        // Request permissions for accessing external storage
         requestPermissions()
     }
 
@@ -172,19 +163,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (webView.canGoBack()) {
-            // Navigate back in the WebView history
             webView.goBack()
         } else {
-            // Handle double back press to exit
             if (doubleBackToExitPressedOnce) {
                 super.onBackPressed()
                 return
             }
-
-            this.doubleBackToExitPressedOnce = true
+            doubleBackToExitPressedOnce = true
             Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
 
-            // Reset the double back press flag after 2 seconds
             Handler(Looper.getMainLooper()).postDelayed({
                 doubleBackToExitPressedOnce = false
             }, 2000)
@@ -193,18 +180,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                // Call the MediaPipeline to upload the selected media
-                MediaPipeline.uploadMedia(uri, this)
-                uploadMessage?.onReceiveValue(arrayOf(uri))
-            }
+                val file = MediaPipeline.getFileFromUri(uri, this)
+                if (file != null) {
+                    Log.d("File Upload", "File ready to upload: ${file.absolutePath}")
+                    uploadMessage?.onReceiveValue(arrayOf(uri))
+                } else {
+                    Log.e("File Upload", "Failed to prepare the file.")
+                    uploadMessage?.onReceiveValue(null)
+                }
+            } ?: uploadMessage?.onReceiveValue(null)
         } else {
             uploadMessage?.onReceiveValue(null)
         }
     }
 
-    // Request necessary permissions for storage access
     private fun requestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
