@@ -21,6 +21,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import com.example.myfirstapp.MediaPipeline
+import com.example.myfirstapp.components.behaviours.KeyboardBehavior // Importing KeyboardBehavior
 
 class MainActivity : AppCompatActivity() {
 
@@ -117,6 +118,10 @@ class MainActivity : AppCompatActivity() {
 
         // Load the initial URL
         loadWebPage("https://www.plus-us.com")
+
+        // Set up KeyboardBehavior for resizing WebView
+        val keyboardBehavior = KeyboardBehavior(layout, webView)
+        keyboardBehavior.setupKeyboardListener()
     }
 
     private fun loadWebPage(url: String) {
