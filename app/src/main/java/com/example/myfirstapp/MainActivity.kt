@@ -165,12 +165,12 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                // Use MediaPipeline to upload the file
-                MediaPipeline.uploadMedia(uri, this)
+                // File selected successfully; invoke callback
                 uploadMessage?.onReceiveValue(arrayOf(uri))
             }
         } else {
             uploadMessage?.onReceiveValue(null)
         }
+        uploadMessage = null
     }
 }
