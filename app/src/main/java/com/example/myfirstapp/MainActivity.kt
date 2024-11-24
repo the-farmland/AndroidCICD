@@ -21,7 +21,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import com.example.myfirstapp.MediaPipeline
-import com.example.myfirstapp.components.behaviours.KeyboardBehavior // Importing KeyboardBehavior
+import com.example.myfirstapp.components.behaviors.KeyboardBehavior // Importing KeyboardBehavior
 
 class MainActivity : AppCompatActivity() {
 
