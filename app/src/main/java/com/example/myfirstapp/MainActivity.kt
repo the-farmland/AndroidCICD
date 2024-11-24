@@ -32,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private var doubleBackToExitPressedOnce = false
     private var uploadMessage: ValueCallback<Array<Uri>>? = null
     private val FILE_PICKER_REQUEST_CODE = 1001
+    private lateinit var noConnection: NoConnection
+    private lateinit var layout: FrameLayout  // Added layout as class property
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         webView = WebView(this)
 
         // Create a FrameLayout to hold both WebView and the "Try Again" message
-        val layout = FrameLayout(this)
+        layout = FrameLayout(this)  // Initialize layout property
         setContentView(layout)
 
         // Create a "Try Again" button and set its visibility to GONE initially
@@ -64,6 +66,9 @@ class MainActivity : AppCompatActivity() {
         layout.addView(webView)
         layout.addView(errorMessage)
         layout.addView(tryAgainButton)
+
+        // Initialize NoConnection handler
+        noConnection = NoConnection(this)
 
         // Configure WebView settings
         webView.apply {
@@ -136,9 +141,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showError(button: Button, errorMessage: TextView) {
-        webView.visibility = View.GONE
-        errorMessage.visibility = View.VISIBLE
-        button.visibility = View.VISIBLE
+        noConnection.handleNoConnection(webView, layout, button, errorMessage, webView.url ?: "https://www.plus-us.com")
     }
 
     private fun hideError(button: Button, errorMessage: TextView) {
