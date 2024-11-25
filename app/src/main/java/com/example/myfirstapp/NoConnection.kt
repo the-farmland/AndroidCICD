@@ -1,6 +1,5 @@
 package com.example.myfirstapp
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -72,11 +71,11 @@ class NoConnection(private val context: Context) {
     }
 
     private fun showReconnectionMessage(container: FrameLayout, webView: android.webkit.WebView) {
-        dinosaurGame?.connectionMessage = "Connection re-established!"
+        dinosaurGame?.onNetworkAvailable()
         
         // Hide the message after 3 seconds
         Handler().postDelayed({
-            dinosaurGame?.connectionMessage = null
+            dinosaurGame?.onNetworkAvailable()
             webView.loadUrl("https://www.plus-us.com")
         }, 3000)
     }
