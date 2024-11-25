@@ -1,6 +1,7 @@
 package com.example.myfirstapp
 
 import android.content.Context
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.Handler
@@ -8,9 +9,6 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.TextView
-import android.webkit.WebView
-import android.graphics.Color
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -20,10 +18,10 @@ class NoConnection(private val context: Context) {
     private var popupView: View? = null
 
     fun handleNoConnection(
-        webView: WebView,
+        webView: android.webkit.WebView,
         container: FrameLayout,
         tryAgainButton: Button,
-        errorMessage: TextView,
+        errorMessage: android.widget.TextView,
         url: String
     ) {
         if (isNetworkAvailable()) {
@@ -89,7 +87,6 @@ class NoConnection(private val context: Context) {
             setPadding(40, 20, 40, 20)
             setBackgroundColor(Color.WHITE)
             elevation = 10f
-            setBackgroundResource(android.R.drawable.dialog_holo_light_frame)
         }
 
         // Add text to the popup
