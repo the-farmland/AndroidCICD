@@ -26,6 +26,11 @@ class DinosaurGame(context: Context) : View(context) {
     private var screenHeight = 0
     private val dinosaurSize = 80f
     private val obstacleSize = 60f
+    
+    // Add callback for connection restored
+    var onConnectionRestored: (() -> Unit)? = null
+    private var showConnectionMessage = false
+    private var connectionMessageBounds = android.graphics.RectF()
 
     private val updateHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
@@ -40,6 +45,11 @@ class DinosaurGame(context: Context) : View(context) {
 
     // Variable for the connection message
     var connectionMessage: String? = null
+        set(value) {
+            field = value
+            showConnectionMessage = value != null
+            invalidate()
+        }
 
     init {
         paint.textSize = 40f
@@ -117,16 +127,50 @@ class DinosaurGame(context: Context) : View(context) {
         }
 
         // Show connection message if it's set
-        connectionMessage?.let {
-            paint.color = Color.WHITE
+        if (showConnectionMessage && connectionMessage != null) {
+            paint.color = Color.parseColor("#007AFF")
             paint.textSize = 50f
-            canvas.drawText(it, screenWidth / 2f - 180f, screenHeight / 3f, paint)
+            
+            // Create message background
+            val message = connectionMessage!!
+            val padding = 40f
+            val textWidth = paint.measureText(message)
+            val textHeight = paint.descent() - paint.ascent()
+            
+            connectionMessageBounds.set(
+                screenWidth / 2f - textWidth / 2f - padding,
+                screenHeight / 3f + paint.ascent() - padding,
+                screenWidth / 2f + textWidth / 2f + padding,
+                screenHeight / 3f + paint.descent() + padding
+            )
+            
+            // Draw rounded rectangle background
+            paint.style = Paint.Style.FILL
+            canvas.drawRoundRect(
+                connectionMessageBounds,
+                25f, 25f,
+                paint
+            )
+            
+            // Draw text
+            paint.color = Color.WHITE
+            canvas.drawText(
+                message,
+                screenWidth / 2f - textWidth / 2f,
+                screenHeight / 3f,
+                paint
+            )
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                if (showConnectionMessage && connectionMessageBounds.contains(event.x, event.y)) {
+                    onConnectionRestored?.invoke()
+                    return true
+                }
+                
                 if (isGameOver) {
                     startGame()
                 } else if (!isJumping) {
