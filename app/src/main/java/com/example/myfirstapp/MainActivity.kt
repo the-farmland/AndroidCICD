@@ -24,7 +24,7 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.myfirstapp.MediaPipeline
+import com.example.myfirstapp.components.behaviors.KeyboardBehavior
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private val FILE_PICKER_REQUEST_CODE = 1001
     private lateinit var noConnection: NoConnection
     private lateinit var layout: FrameLayout
+    private lateinit var keyboardBehavior: KeyboardBehavior
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,6 +149,10 @@ class MainActivity : AppCompatActivity() {
             webView.reload()
             hideError(tryAgainButton, errorMessage)
         }
+
+        // Initialize KeyboardBehavior to manage WebView resizing
+        keyboardBehavior = KeyboardBehavior(layout, webView)
+        keyboardBehavior.setupKeyboardListener()
 
         loadWebPage("https://www.plus-us.com")
         requestPermissions()
