@@ -1,35 +1,32 @@
 package com.example.myfirstapp
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Handler
+import android.view.Gravity
 import android.view.View
+import android.view.animation.AlphaAnimation
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 
 class NoConnection(private val context: Context) {
     private var dinosaurGame: DinosaurGame? = null
+    private var reconnectionPopup: TextView? = null
 
     fun handleNoConnection(
         webView: android.webkit.WebView,
         container: FrameLayout,
         tryAgainButton: Button,
-        errorMessage: android.widget.TextView,
+        errorMessage: TextView,
         url: String
     ) {
         if (isNetworkAvailable()) {
             // Internet is available
-            showReconnectionMessage(container, webView)
-            webView.loadUrl(url)
-            webView.visibility = View.VISIBLE
-            errorMessage.visibility = View.GONE
-            tryAgainButton.visibility = View.GONE
-
-            // Remove dinosaur game if it exists
+            showReconnectionMessage(container, webView, url)
             dinosaurGame?.let {
-                it.stopGame()
-                container.removeView(it)
-                dinosaurGame = null
+                // Keep the game visible but show message over it
+                showGameOverlay(container, url, webView)
             }
         } else {
             // No internet connection
@@ -57,13 +54,61 @@ class NoConnection(private val context: Context) {
         return networkInfo != null && networkInfo.isConnected
     }
 
-    private fun showReconnectionMessage(container: FrameLayout, webView: android.webkit.WebView) {
-        dinosaurGame?.connectionMessage = "Connection re-established!"
-        
-        // Hide the message after 3 seconds
-        Handler().postDelayed({
-            dinosaurGame?.connectionMessage = null
-            webView.loadUrl("https://www.plus-us.com")
-        }, 3000)
+    private fun showGameOverlay(container: FrameLayout, url: String, webView: android.webkit.WebView) {
+        // Remove existing popup if any
+        reconnectionPopup?.let { container.removeView(it) }
+
+        reconnectionPopup = TextView(context).apply {
+            text = "Connection Restored\nTap to continue"
+            setTextColor(Color.WHITE)
+            textSize = 20f
+            gravity = Gravity.CENTER
+            setPadding(40, 20, 40, 20)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(Color.parseColor("#007AFF"))
+                cornerRadius = 25f
+                alpha = 230 // Slightly transparent
+            }
+
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
+
+            setOnClickListener {
+                // Remove game and popup
+                dinosaurGame?.let {
+                    it.stopGame()
+                    container.removeView(it)
+                    dinosaurGame = null
+                }
+                container.removeView(this)
+                webView.visibility = View.VISIBLE
+                webView.loadUrl(url)
+            }
+        }
+
+        // Add popup to container (on top of the game)
+        container.addView(reconnectionPopup)
+
+        // Fade in animation
+        val fadeIn = AlphaAnimation(0f, 1f).apply {
+            duration = 500
+            fillAfter = true
+        }
+        reconnectionPopup?.startAnimation(fadeIn)
+    }
+
+    private fun showReconnectionMessage(container: FrameLayout, webView: android.webkit.WebView, url: String) {
+        // Keep the game running and show overlay
+        if (dinosaurGame != null) {
+            showGameOverlay(container, url, webView)
+        } else {
+            // If no game is running, just restore the webview
+            webView.visibility = View.VISIBLE
+            webView.loadUrl(url)
+        }
     }
 }
