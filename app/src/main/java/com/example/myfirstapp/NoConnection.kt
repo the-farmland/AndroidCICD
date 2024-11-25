@@ -26,11 +26,13 @@ class NoConnection(private val context: Context) {
     ) {
         if (isNetworkAvailable()) {
             // Internet is available
-            showReconnectionPopup(container)
             webView.loadUrl(url)
             webView.visibility = View.VISIBLE
             errorMessage.visibility = View.GONE
             tryAgainButton.visibility = View.GONE
+
+            // Show reconnection popup
+            showReconnectionPopup(container)
 
             // Remove dinosaur game if it exists
             dinosaurGame?.let {
@@ -41,13 +43,12 @@ class NoConnection(private val context: Context) {
         } else {
             // No internet connection
             webView.visibility = View.GONE
-            errorMessage.visibility = View.GONE  // Hide error message when showing game
-            tryAgainButton.visibility = View.GONE  // Hide try again button when showing game
+            errorMessage.visibility = View.GONE  // Hide error message when showing the game
+            tryAgainButton.visibility = View.GONE  // Hide try again button when showing the game
 
             // Show dinosaur game
             if (dinosaurGame == null) {
                 dinosaurGame = DinosaurGame(context)
-                // Set layout parameters for the game to fill the container
                 val layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
@@ -103,6 +104,7 @@ class NoConnection(private val context: Context) {
             setBackgroundColor(Color.TRANSPARENT)
             setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_light))
             setOnClickListener {
+                // Remove popup view when dismissed
                 popupView?.let { container.removeView(it) }
                 popupView = null
             }
