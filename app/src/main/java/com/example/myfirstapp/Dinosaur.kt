@@ -16,16 +16,15 @@ class DinosaurGame(context: Context) : View(context) {
     private var dinosaurX = 0f
     private var isJumping = false
     private var jumpVelocity = 0f
-    private val gravity = 0.6f
-    private val jumpStrength = -12f
+    private val gravity = 0.4f  // Reduced gravity for bigger jumps
+    private val jumpStrength = -20f  // Increased jump strength for higher jumps
     private var obstacles = mutableListOf<Pair<Float, Float>>()
     private var score = 0
     private var isGameOver = false
     private var gameSpeed = 12f
-
     private var screenWidth = 0
     private var screenHeight = 0
-    private val dinosaurSize = 80f // Approx 2rem in pixels for modern screens
+    private val dinosaurSize = 80f
     private val obstacleSize = 60f
 
     private val updateHandler = Handler(Looper.getMainLooper())
@@ -38,6 +37,9 @@ class DinosaurGame(context: Context) : View(context) {
             }
         }
     }
+
+    // Variable for the connection message
+    var connectionMessage: String? = null
 
     init {
         paint.textSize = 40f
@@ -112,6 +114,13 @@ class DinosaurGame(context: Context) : View(context) {
             canvas.drawText("Game Over!", screenWidth / 2f - 120f, screenHeight / 2f, paint)
             paint.textSize = 30f
             canvas.drawText("Tap to restart", screenWidth / 2f - 80f, screenHeight / 2f + 50f, paint)
+        }
+
+        // Show connection message if it's set
+        connectionMessage?.let {
+            paint.color = Color.WHITE
+            paint.textSize = 50f
+            canvas.drawText(it, screenWidth / 2f - 180f, screenHeight / 3f, paint)
         }
     }
 
