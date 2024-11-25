@@ -1,3 +1,15 @@
+package com.example.myfirstapp
+
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Color
+import android.view.MotionEvent
+import android.view.View
+import android.os.Handler
+import android.os.Looper
+import kotlin.random.Random
+
 class DinosaurGame(context: Context) : View(context) {
     private val paint = Paint()
     private var dinosaurY = 0f
