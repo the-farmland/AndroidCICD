@@ -3,15 +3,21 @@ package com.example.myfirstapp
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.os.Handler
+import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.webkit.WebView
+import android.graphics.Color
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 
 class NoConnection(private val context: Context) {
     private var dinosaurGame: DinosaurGame? = null
+    private var popupView: View? = null
 
     fun handleNoConnection(
         webView: WebView,
@@ -22,6 +28,7 @@ class NoConnection(private val context: Context) {
     ) {
         if (isNetworkAvailable()) {
             // Internet is available
+            showReconnectionPopup(container)
             webView.loadUrl(url)
             webView.visibility = View.VISIBLE
             errorMessage.visibility = View.GONE
@@ -44,8 +51,8 @@ class NoConnection(private val context: Context) {
                 dinosaurGame = DinosaurGame(context)
                 // Set layout parameters for the game to fill the container
                 val layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
                 )
                 dinosaurGame?.layoutParams = layoutParams
                 container.addView(dinosaurGame, 0)  // Add at index 0 to be behind other views
@@ -59,8 +66,60 @@ class NoConnection(private val context: Context) {
     }
 
     private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
         return networkInfo != null && networkInfo.isConnected
+    }
+
+    private fun showReconnectionPopup(container: FrameLayout) {
+        // Remove any existing popup to avoid duplicates
+        popupView?.let { container.removeView(it) }
+
+        // Create the popup programmatically
+        popupView = LinearLayout(context).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+                setMargins(32, 32, 32, 32)
+            }
+            orientation = LinearLayout.VERTICAL
+            setPadding(40, 20, 40, 20)
+            setBackgroundColor(Color.WHITE)
+            elevation = 10f
+            setBackgroundResource(android.R.drawable.dialog_holo_light_frame)
+        }
+
+        // Add text to the popup
+        val message = TextView(context).apply {
+            text = "Connection re-established!"
+            textSize = 18f
+            setTextColor(Color.BLACK)
+            gravity = Gravity.CENTER
+        }
+
+        // Add a "Dismiss" button
+        val dismissButton = Button(context).apply {
+            text = "Dismiss"
+            setBackgroundColor(Color.TRANSPARENT)
+            setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_light))
+            setOnClickListener {
+                popupView?.let { container.removeView(it) }
+                popupView = null
+            }
+        }
+
+        (popupView as LinearLayout).addView(message)
+        (popupView as LinearLayout).addView(dismissButton)
+
+        container.addView(popupView)
+
+        // Auto-dismiss popup after 3 seconds
+        Handler().postDelayed({
+            popupView?.let { container.removeView(it) }
+            popupView = null
+        }, 3000)
     }
 }

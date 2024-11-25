@@ -12,106 +12,109 @@ import kotlin.random.Random
 
 class DinosaurGame(context: Context) : View(context) {
     private val paint = Paint()
-    private var dinosaurY = 300f
-    private var dinosaurX = 100f
+    private var dinosaurY = 0f
+    private var dinosaurX = 0f
     private var isJumping = false
     private var jumpVelocity = 0f
-    private val gravity = 0.8f
-    private val jumpStrength = -15f
+    private val gravity = 0.6f
+    private val jumpStrength = -12f
     private var obstacles = mutableListOf<Pair<Float, Float>>()
     private var score = 0
     private var isGameOver = false
-    private var gameSpeed = 10f
-    
+    private var gameSpeed = 12f
+
+    private var screenWidth = 0
+    private var screenHeight = 0
+    private val dinosaurSize = 80f // Approx 2rem in pixels for modern screens
+    private val obstacleSize = 60f
+
     private val updateHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
             updateGame()
             invalidate()
             if (!isGameOver) {
-                updateHandler.postDelayed(this, 16) // ~60 FPS
+                updateHandler.postDelayed(this, 12) // Faster updates (~80 FPS)
             }
         }
     }
-    
+
     init {
-        // Set default paint properties
         paint.textSize = 40f
-        paint.color = Color.WHITE  // Set default text color to white
+        paint.color = Color.WHITE
         startGame()
     }
-    
+
     private fun startGame() {
         score = 0
         isGameOver = false
         obstacles.clear()
-        dinosaurY = 300f
+
+        post {
+            screenWidth = width
+            screenHeight = height
+            dinosaurX = screenWidth / 5f
+            dinosaurY = screenHeight / 2f
+        }
+
         updateHandler.post(updateRunnable)
     }
-    
+
     private fun updateGame() {
-        // Update dinosaur position
         if (isJumping) {
             jumpVelocity += gravity
             dinosaurY += jumpVelocity
-            if (dinosaurY > 300f) {
-                dinosaurY = 300f
+            if (dinosaurY > screenHeight / 2f) {
+                dinosaurY = screenHeight / 2f
                 isJumping = false
                 jumpVelocity = 0f
             }
         }
-        
-        // Update obstacles
+
         if (Random.nextFloat() < 0.02) {
-            obstacles.add(Pair(width.toFloat(), 300f))
+            obstacles.add(Pair(screenWidth.toFloat(), screenHeight / 2f))
         }
-        
+
         obstacles = obstacles.mapNotNull { (x, y) ->
             val newX = x - gameSpeed
-            if (newX < -20) null else Pair(newX, y)
+            if (newX < -obstacleSize) null else Pair(newX, y)
         }.toMutableList()
-        
-        // Check collisions
+
         obstacles.forEach { (x, y) ->
-            if (Math.abs(x - dinosaurX) < 30 && Math.abs(y - dinosaurY) < 30) {
+            if (Math.abs(x - dinosaurX) < dinosaurSize && Math.abs(y - dinosaurY) < dinosaurSize) {
                 isGameOver = true
             }
         }
-        
-        // Update score
+
         if (!isGameOver) {
             score++
         }
     }
-    
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        
-        // Draw dinosaur (X)
-        paint.color = Color.GREEN  // Make dinosaur green
-        paint.textSize = 40f
-        canvas.drawText("X", dinosaurX, dinosaurY, paint)
-        
-        // Draw obstacles (O)
-        paint.color = Color.RED  // Make obstacles red
+
+        paint.color = Color.GREEN
+        canvas.drawText("X", dinosaurX, dinosaurY, paint.apply { textSize = dinosaurSize })
+
+        paint.color = Color.RED
         obstacles.forEach { (x, y) ->
-            canvas.drawText("O", x, y, paint)
+            canvas.drawText("O", x, y, paint.apply { textSize = obstacleSize })
         }
-        
-        // Draw score
-        paint.color = Color.WHITE  // Make score white
+
+        paint.color = Color.WHITE
         paint.textSize = 30f
         canvas.drawText("Score: $score", 50f, 50f, paint)
-        
+
         if (isGameOver) {
-            paint.color = Color.YELLOW  // Make game over text yellow
+            paint.color = Color.YELLOW
             paint.textSize = 60f
-            canvas.drawText("Game Over!", width/2f - 120f, height/2f, paint)
+            canvas.drawText("Game Over!", screenWidth / 2f - 120f, screenHeight / 2f, paint)
             paint.textSize = 30f
-            canvas.drawText("Tap to restart", width/2f - 80f, height/2f + 50f, paint)
+            canvas.drawText("Tap to restart", screenWidth / 2f - 80f, screenHeight / 2f + 50f, paint)
         }
     }
-    
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -125,7 +128,7 @@ class DinosaurGame(context: Context) : View(context) {
         }
         return true
     }
-    
+
     fun stopGame() {
         updateHandler.removeCallbacks(updateRunnable)
     }
