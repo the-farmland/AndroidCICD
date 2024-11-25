@@ -1,41 +1,51 @@
 package com.example.myfirstapp.components.network
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
-import android.widget.Toast
-import com.example.myfirstapp.DinosaurGame
+import android.os.SystemClock
 
 class NetworkChangeReceiver : BroadcastReceiver() {
 
-    private var dinosaurGame: DinosaurGame? = null
-
-    // Setter method to pass the DinosaurGame instance
-    fun setDinosaurGame(game: DinosaurGame) {
-        this.dinosaurGame = game
+    companion object {
+        private var lastNotificationTime: Long = 0
+        private const val NOTIFICATION_INTERVAL = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork
-
-        // Check for network capabilities
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-        
-        if (networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-            // Network is available
-            dinosaurGame?.onNetworkAvailable() // Notify the DinosaurGame
-        } else {
-            // Network is not available
-            Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show()
+    override fun onReceive(context: Context, intent: Intent?) {
+        if (isConnected(context)) {
+            val currentTime = SystemClock.elapsedRealtime()
+            if (currentTime - lastNotificationTime > NOTIFICATION_INTERVAL) {
+                sendNotification(context)
+                lastNotificationTime = currentTime
+            }
         }
     }
 
-    // Method to update the DinosaurGame instance dynamically if needed
-    fun setDinosaurGame(dinosaurGame: DinosaurGame?) {
-        this.dinosaurGame = dinosaurGame
+    private fun isConnected(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun sendNotification(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create a simple notification
+        val notification = Notification.Builder(context)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Default Android icon
+            .setContentTitle("Internet Restored!")
+            .setContentText("Catch up on what's happening now!")
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(1, notification)
     }
 }
