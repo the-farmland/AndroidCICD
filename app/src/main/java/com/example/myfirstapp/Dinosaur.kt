@@ -1,31 +1,22 @@
-package com.example.myfirstapp
-
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Color
-import android.view.MotionEvent
-import android.view.View
-import android.os.Handler
-import android.os.Looper
-import kotlin.random.Random
-
 class DinosaurGame(context: Context) : View(context) {
     private val paint = Paint()
     private var dinosaurY = 0f
     private var dinosaurX = 0f
     private var isJumping = false
     private var jumpVelocity = 0f
-    private val gravity = 0.4f  // Reduced gravity for bigger jumps
-    private val jumpStrength = -20f  // Increased jump strength for higher jumps
+    private val gravity = 0.6f
+    private val jumpStrength = -20f // Increased jump strength for higher jumps
     private var obstacles = mutableListOf<Pair<Float, Float>>()
     private var score = 0
     private var isGameOver = false
     private var gameSpeed = 12f
+
     private var screenWidth = 0
     private var screenHeight = 0
-    private val dinosaurSize = 80f
+    private val dinosaurSize = 80f // Approx 2rem in pixels for modern screens
     private val obstacleSize = 60f
+    private var connectionMessageVisible = false
+    private val messageTimeout = 3000L // Time to show message in ms
 
     private val updateHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
@@ -37,9 +28,6 @@ class DinosaurGame(context: Context) : View(context) {
             }
         }
     }
-
-    // Variable for the connection message
-    var connectionMessage: String? = null
 
     init {
         paint.textSize = 40f
@@ -96,18 +84,22 @@ class DinosaurGame(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        // Draw dinosaur
         paint.color = Color.GREEN
         canvas.drawText("X", dinosaurX, dinosaurY, paint.apply { textSize = dinosaurSize })
 
+        // Draw obstacles
         paint.color = Color.RED
         obstacles.forEach { (x, y) ->
             canvas.drawText("O", x, y, paint.apply { textSize = obstacleSize })
         }
 
+        // Draw score
         paint.color = Color.WHITE
         paint.textSize = 30f
         canvas.drawText("Score: $score", 50f, 50f, paint)
 
+        // Draw game over message
         if (isGameOver) {
             paint.color = Color.YELLOW
             paint.textSize = 60f
@@ -116,11 +108,24 @@ class DinosaurGame(context: Context) : View(context) {
             canvas.drawText("Tap to restart", screenWidth / 2f - 80f, screenHeight / 2f + 50f, paint)
         }
 
-        // Show connection message if it's set
-        connectionMessage?.let {
-            paint.color = Color.WHITE
+        // Show connection re-established message
+        if (connectionMessageVisible) {
+            paint.color = Color.CYAN
             paint.textSize = 50f
-            canvas.drawText(it, screenWidth / 2f - 180f, screenHeight / 3f, paint)
+            canvas.drawText("Connection Re-established!", screenWidth / 2f - 150f, screenHeight / 2f - 100f, paint)
+        }
+    }
+
+    fun onNetworkAvailable() {
+        if (!connectionMessageVisible) {
+            connectionMessageVisible = true
+            invalidate()
+
+            // Hide message after a delay
+            Handler(Looper.getMainLooper()).postDelayed({
+                connectionMessageVisible = false
+                invalidate()
+            }, messageTimeout)
         }
     }
 
