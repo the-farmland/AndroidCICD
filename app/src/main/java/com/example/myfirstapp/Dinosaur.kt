@@ -11,7 +11,6 @@ import android.view.View
 import kotlin.random.Random
 
 class DinosaurGame(context: Context) : View(context) {
-
     private val paint = Paint()
     private var dinosaurY = 0f
     private var dinosaurX = 0f

@@ -4,27 +4,32 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.widget.Toast
 import com.example.myfirstapp.DinosaurGame
 
 class NetworkChangeReceiver : BroadcastReceiver() {
 
+<<<<<<< HEAD
     private var dinosaurGame: DinosaurGame? = null
 
-    // Default constructor required for BroadcastReceiver
-    constructor()
-
-    // Optionally, you could have a constructor that accepts DinosaurGame for initialization
-    constructor(dinosaurGame: DinosaurGame?) : this() {
-        this.dinosaurGame = dinosaurGame
+    // Setter method to pass the DinosaurGame instance
+    fun setDinosaurGame(game: DinosaurGame) {
+        this.dinosaurGame = game
     }
 
-    override fun onReceive(context: Context?, intent: Intent?) {
-        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+    override fun onReceive(context: Context, intent: Intent) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetworkInfo
 
+        if (activeNetwork != null && activeNetwork.isConnected) {
+            // Network is available
+            dinosaurGame?.onNetworkAvailable() // Notify the DinosaurGame
+        } else {
+            // Network is not available
+            Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show()
         if (networkInfo != null && networkInfo.isConnected) {
             dinosaurGame?.onNetworkAvailable() // Notify DinosaurGame that the network is available
+>>>>>>> 86a9fe19ce68bc67f97d5a72449af1b494d481ff
         }
     }
 
