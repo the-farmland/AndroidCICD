@@ -50,6 +50,13 @@ class MainActivity : AppCompatActivity() {
         // Create the WebView
         webView = WebView(this)
 
+        // Remove scrollbars from the WebView
+        webView.apply {
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+
         // Create a FrameLayout to hold both WebView and the "Try Again" message
         layout = FrameLayout(this).apply {
             layoutParams = FrameLayout.LayoutParams(

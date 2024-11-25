@@ -10,11 +10,32 @@ import java.io.File
 object MediaPipeline {
 
     /**
-     * Launches the Media Picker to allow users to select media files.
+     * Launches the Media Picker, Gallery, or Document Picker as a fallback.
+     * Attempts to prioritize opening the Media Picker or Gallery first.
+     * @return The configured Intent to launch the appropriate picker.
      */
     fun launchMediaPicker(): Intent {
-        return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+        val mediaPickerIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
             type = "image/*"
+        }
+
+        val galleryIntent = Intent(Intent.ACTION_VIEW).apply {
+            data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            type = "image/*"
+        }
+
+        val documentPickerIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+
+        // Verify if any of the intents can resolve
+        return Intent.createChooser(
+            mediaPickerIntent,
+            "Select Media"
+        ).apply {
+            // If Media Picker and Gallery aren't available, fallback to Document Picker
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(galleryIntent, documentPickerIntent))
         }
     }
 
