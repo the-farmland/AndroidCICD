@@ -8,48 +8,34 @@ import android.view.MotionEvent
 import android.view.View
 import android.os.Handler
 import android.os.Looper
+import kotlin.math.abs
 import kotlin.random.Random
 
 class DinosaurGame(context: Context) : View(context) {
     private val paint = Paint()
     private var grid = Array(8) { Array(8) { 0 } }
-    private var selectedDots = mutableListOf<Pair<Int, Int>>()
+    private var selectedDot: Pair<Int, Int>? = null
     private var score = 0
     private var isGameOver = false
     private var currentLevel = 1
-    private val colorPalette = mutableListOf(
-        Color.RED, 
-        Color.BLUE, 
-        Color.GREEN, 
-        Color.YELLOW, 
-        Color.MAGENTA
+    private val colorPalette = listOf(
+        Color.RED, Color.BLUE, Color.GREEN, 
+        Color.YELLOW, Color.MAGENTA, Color.CYAN, 
+        Color.ORANGE, Color.PINK
     )
     private var screenWidth = 0
     private var screenHeight = 0
     private val dotSize = 80f
     private val dotSpacing = 10f
 
-    // Add callback for connection restored
-    var onConnectionRestored: (() -> Unit)? = null
-    private var showConnectionMessage = false
-    private var connectionMessageBounds = android.graphics.RectF()
-
     private val updateHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
             updateGame()
             invalidate()
-            updateHandler.postDelayed(this, 16) // Smoother updates
+            updateHandler.postDelayed(this, 16)
         }
     }
-
-    // Variable for the connection message
-    var connectionMessage: String? = null
-        set(value) {
-            field = value
-            showConnectionMessage = value != null
-            invalidate()
-        }
 
     init {
         paint.textSize = 40f
@@ -66,70 +52,68 @@ class DinosaurGame(context: Context) : View(context) {
     }
 
     private fun initializeGrid() {
-        // Initialize grid with random colors based on current level
-        val maxColor = minOf(colorPalette.size, 2 + currentLevel)
-        grid = Array(8) { Array(8) { 
-            Random.nextInt(maxColor)
-        } }
+        grid = Array(8) { x ->
+            Array(8) { y ->
+                Random.nextInt(minOf(colorPalette.size, 2 + currentLevel))
+            }
+        }
     }
 
     private fun updateGame() {
-        // Check for matches and remove them
-        val matchedDots = findMatches()
-        if (matchedDots.isNotEmpty()) {
-            removeMatches(matchedDots)
-            fillEmptySpaces()
-            score += matchedDots.size * currentLevel
+        // Gravity effect and match checking
+        applyGravity()
+        val matches = findMatches()
+        if (matches.isNotEmpty()) {
+            removeMatches(matches)
+            score += matches.size * currentLevel
         }
 
-        // Increase difficulty periodically
+        // Level progression
         if (score > currentLevel * 1000) {
             currentLevel++
-            if (currentLevel > 5) {
-                // Add a new color if we haven't reached max colors
-                if (colorPalette.size < 8) {
-                    colorPalette.add(generateNewColor())
-                }
-            }
             initializeGrid()
         }
     }
 
-    private fun generateNewColor(): Int {
-        // Generate a random color that's not already in the palette
-        while (true) {
-            val newColor = Color.rgb(
-                Random.nextInt(256), 
-                Random.nextInt(256), 
-                Random.nextInt(256)
-            )
-            if (!colorPalette.contains(newColor)) {
-                return newColor
+    private fun applyGravity() {
+        for (x in 0 until 8) {
+            val column = grid[x].filterNot { it == -1 }
+            val newColumn = MutableList(8) { -1 }
+            
+            // Fill bottom of column with existing dots
+            for (i in column.indices) {
+                newColumn[8 - column.size + i] = column[i]
             }
+            
+            // Refill top with new random colors
+            for (y in 0 until 8) {
+                if (newColumn[y] == -1) {
+                    newColumn[y] = Random.nextInt(minOf(colorPalette.size, 2 + currentLevel))
+                }
+            }
+            
+            // Update grid column
+            grid[x] = newColumn.toTypedArray()
         }
     }
 
     private fun findMatches(): List<Pair<Int, Int>> {
         val matches = mutableSetOf<Pair<Int, Int>>()
         
-        // Check horizontal matches
+        // Horizontal matches
         for (y in 0 until 8) {
             for (x in 0 until 6) {
-                if (grid[x][y] == grid[x+1][y] && grid[x][y] == grid[x+2][y]) {
-                    matches.add(Pair(x,y))
-                    matches.add(Pair(x+1,y))
-                    matches.add(Pair(x+2,y))
+                if (grid[x][y] != -1 && grid[x][y] == grid[x+1][y] && grid[x][y] == grid[x+2][y]) {
+                    matches.addAll(listOf(Pair(x,y), Pair(x+1,y), Pair(x+2,y)))
                 }
             }
         }
         
-        // Check vertical matches
+        // Vertical matches
         for (x in 0 until 8) {
             for (y in 0 until 6) {
-                if (grid[x][y] == grid[x][y+1] && grid[x][y] == grid[x][y+2]) {
-                    matches.add(Pair(x,y))
-                    matches.add(Pair(x,y+1))
-                    matches.add(Pair(x,y+2))
+                if (grid[x][y] != -1 && grid[x][y] == grid[x][y+1] && grid[x][y] == grid[x][y+2]) {
+                    matches.addAll(listOf(Pair(x,y), Pair(x,y+1), Pair(x,y+2)))
                 }
             }
         }
@@ -139,35 +123,17 @@ class DinosaurGame(context: Context) : View(context) {
 
     private fun removeMatches(matches: List<Pair<Int, Int>>) {
         matches.forEach { (x, y) ->
-            grid[x][y] = -1  // Mark as removed
-        }
-    }
-
-    private fun fillEmptySpaces() {
-        // Drop down non-removed dots
-        for (x in 0 until 8) {
-            val column = (0 until 8).mapNotNull { y ->
-                if (grid[x][y] != -1) grid[x][y] else null
-            }.toMutableList()
-            
-            // Fill top with new random colors
-            while (column.size < 8) {
-                column.add(0, Random.nextInt(minOf(colorPalette.size, 2 + currentLevel)))
-            }
-            
-            // Update the column
-            for (y in 0 until 8) {
-                grid[x][y] = column[y]
-            }
+            grid[x][y] = -1
         }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         
-        // Calculate grid positioning
-        val gridStartX = (screenWidth - (8 * (dotSize + dotSpacing))) / 2
-        val gridStartY = screenHeight / 4f
+        // Calculate centered grid positioning
+        val gridWidth = 8 * (dotSize + dotSpacing)
+        val gridStartX = (screenWidth - gridWidth) / 2
+        val gridStartY = (screenHeight - gridWidth) / 2
 
         // Draw grid of dots
         for (x in 0 until 8) {
@@ -189,87 +155,38 @@ class DinosaurGame(context: Context) : View(context) {
         paint.textSize = 40f
         canvas.drawText("Score: $score", 50f, 50f, paint)
         canvas.drawText("Level: $currentLevel", screenWidth - 250f, 50f, paint)
-
-        // Game over screen
-        if (isGameOver) {
-            paint.color = Color.YELLOW
-            paint.textSize = 60f
-            canvas.drawText("Game Over!", screenWidth / 2f - 120f, screenHeight / 2f, paint)
-            paint.textSize = 30f
-            canvas.drawText("Tap to restart", screenWidth / 2f - 80f, screenHeight / 2f + 50f, paint)
-        }
-
-        // Connection message logic remains the same as in original code
-        if (showConnectionMessage && connectionMessage != null) {
-            paint.color = Color.parseColor("#007AFF")
-            paint.textSize = 50f
-            
-            val message = connectionMessage!!
-            val padding = 40f
-            val textWidth = paint.measureText(message)
-            val textHeight = paint.descent() - paint.ascent()
-            
-            connectionMessageBounds.set(
-                screenWidth / 2f - textWidth / 2f - padding,
-                screenHeight / 3f + paint.ascent() - padding,
-                screenWidth / 2f + textWidth / 2f + padding,
-                screenHeight / 3f + paint.descent() + padding
-            )
-            
-            paint.style = Paint.Style.FILL
-            canvas.drawRoundRect(
-                connectionMessageBounds,
-                25f, 25f,
-                paint
-            )
-            
-            paint.color = Color.WHITE
-            canvas.drawText(
-                message,
-                screenWidth / 2f - textWidth / 2f,
-                screenHeight / 3f,
-                paint
-            )
-        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Calculate centered grid positioning
+        val gridWidth = 8 * (dotSize + dotSpacing)
+        val gridStartX = (screenWidth - gridWidth) / 2
+        val gridStartY = (screenHeight - gridWidth) / 2
+
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Connection message handler
-                if (showConnectionMessage && connectionMessageBounds.contains(event.x, event.y)) {
-                    onConnectionRestored?.invoke()
-                    return true
-                }
-                
-                // Restart game if game over
-                if (isGameOver) {
-                    startGame()
-                    return true
-                }
-
-                // Calculate grid positioning
-                val gridStartX = (screenWidth - (8 * (dotSize + dotSpacing))) / 2
-                val gridStartY = screenHeight / 4f
-
-                // Calculate touched dot
-                val touchX = event.x
-                val touchY = event.y
-                
+                // Find touched dot
                 for (x in 0 until 8) {
                     for (y in 0 until 8) {
                         val dotCenterX = gridStartX + x * (dotSize + dotSpacing) + dotSize / 2
                         val dotCenterY = gridStartY + y * (dotSize + dotSpacing) + dotSize / 2
 
                         // Check if touch is inside dot
-                        if (Math.sqrt(Math.pow((touchX - dotCenterX).toDouble(), 2.0) + 
-                                       Math.pow((touchY - dotCenterY).toDouble(), 2.0)) <= dotSize / 2) {
-                            // Handle dot selection/deselection
-                            val dot = Pair(x, y)
-                            if (selectedDots.contains(dot)) {
-                                selectedDots.remove(dot)
+                        if (abs(event.x - dotCenterX) <= dotSize / 2 && 
+                            abs(event.y - dotCenterY) <= dotSize / 2) {
+                            
+                            // If no dot selected, select current dot
+                            if (selectedDot == null) {
+                                selectedDot = Pair(x, y)
                             } else {
-                                selectedDots.add(dot)
+                                // Check if new dot is adjacent to selected dot
+                                val (prevX, prevY) = selectedDot!!
+                                if (isAdjacent(prevX, prevY, x, y)) {
+                                    // Swap dots
+                                    swapDots(prevX, prevY, x, y)
+                                }
+                                // Reset selection
+                                selectedDot = null
                             }
                             break
                         }
@@ -280,7 +197,29 @@ class DinosaurGame(context: Context) : View(context) {
         return true
     }
 
-    fun stopGame() {
-        updateHandler.removeCallbacks(updateRunnable)
+    private fun isAdjacent(x1: Int, y1: Int, x2: Int, y2: Int): Boolean {
+        return (abs(x1 - x2) == 1 && y1 == y2) || 
+               (abs(y1 - y2) == 1 && x1 == x2)
+    }
+
+    private fun swapDots(x1: Int, y1: Int, x2: Int, y2: Int) {
+        // Swap dots in the grid
+        val temp = grid[x1][y1]
+        grid[x1][y1] = grid[x2][y2]
+        grid[x2][y2] = temp
+        
+        // Check if swap creates a match
+        val matches = findMatches()
+        if (matches.isEmpty()) {
+            // If no match, swap back
+            grid[x1][y1] = grid[x2][y2]
+            grid[x2][y2] = temp
+        }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        screenWidth = w
+        screenHeight = h
     }
 }
