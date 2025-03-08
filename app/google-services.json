@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "377394941026",
+    "project_id": "arplnet",
+    "storage_bucket": "arplnet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377394941026:android:8109cb7dbe42325873d53b",
+        "android_client_info": {
+          "package_name": "com.example.myfirstapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377394941026-dir91tvugcehojf4ejvaiqgk2a82s9gp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7psK-MiXB0hO0W8pOcUzCiGQK-SQfjxQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377394941026-dir91tvugcehojf4ejvaiqgk2a82s9gp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
