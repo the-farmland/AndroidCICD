@@ -25,8 +25,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.myfirstapp.components.behaviors.KeyboardBehavior
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -38,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var noConnection: NoConnection
     private lateinit var layout: FrameLayout
     private lateinit var keyboardBehavior: KeyboardBehavior
-    private val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +46,6 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = Color.TRANSPARENT
 
         setContentView(R.layout.activity_main)
-
-        // Initialize Firebase Cloud Messaging
-        initFirebaseMessaging()
 
         // Create the WebView
         webView = WebView(this)
@@ -169,33 +163,6 @@ class MainActivity : AppCompatActivity() {
 
         loadWebPage("https://www.plus-us.com")
         requestPermissions()
-    }
-
-    private fun initFirebaseMessaging() {
-        // Get FCM token
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and save the token
-            Log.d(TAG, "FCM Token: $token")
-            // You might want to send this token to your server
-        })
-
-        // Subscribe to a topic (optional)
-        FirebaseMessaging.getInstance().subscribeToTopic("general")
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d(TAG, "Successfully subscribed to topic: general")
-                } else {
-                    Log.e(TAG, "Failed to subscribe to topic: general", task.exception)
-                }
-            }
     }
 
     private fun loadWebPage(url: String) {
